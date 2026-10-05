@@ -34,6 +34,10 @@ public class MyServer {
                     String sonuc = veriTabani.get(parcalar[1]);
                     out.println(sonuc);
                 }
+                else if (parcalar[0].equalsIgnoreCase("PING")){
+                    out.print("+PONG\r\n");
+                    out.flush();
+                }
                 else {
                     out.println("Geçersiz komut girildi.");
                 }
