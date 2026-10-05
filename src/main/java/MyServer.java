@@ -18,7 +18,11 @@ public class MyServer {
 
             System.out.println("Client Kabul Edildi.");
 
-            out.println("PONG");
+            String istemciMesaji;
+            while((istemciMesaji = in.readLine()) != null){
+                System.out.println(istemciMesaji);
+                out.println(istemciMesaji);
+            }
 
         }
         catch (IOException e){
