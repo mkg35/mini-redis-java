@@ -4,9 +4,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class MyServer {
     public static void main(String[] args) {
+
+        HashMap<String,String> veriTabani = new HashMap<>();
+
         try (ServerSocket serverSocket = new ServerSocket(6666);
              Socket clientSocket = serverSocket.accept();
              PrintWriter out = new PrintWriter(clientSocket.getOutputStream(),true);
@@ -20,8 +24,19 @@ public class MyServer {
 
             String istemciMesaji;
             while((istemciMesaji = in.readLine()) != null){
-                System.out.println(istemciMesaji);
-                out.println(istemciMesaji);
+
+                String[] parcalar = istemciMesaji.split(" ");
+                if (parcalar[0].equalsIgnoreCase("Set")){
+                    veriTabani.put(parcalar[1],parcalar[2]);
+                    out.println("Kaydedildi.");
+                }
+                else if (parcalar[0].equalsIgnoreCase("Get")){
+                    String sonuc = veriTabani.get(parcalar[1]);
+                    out.println(sonuc);
+                }
+                else {
+                    out.println("Geçersiz komut girildi.");
+                }
             }
 
         }
