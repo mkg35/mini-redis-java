@@ -69,12 +69,33 @@ public class ClientHandler implements Runnable {
                                 }
                                 
                             }
-                        } else {
+                        }
+                        else if (parcalar[0].equalsIgnoreCase("INCR")){
+                            if(parcalar.length < 2){
+                                throw new InvalidCommandException("INCR komutu icin eksik arguman");
+                            }
+                            else {
+                                // DİKKAT: Race Condition'a açık olan o meşhur hatalı blok
+                                String rawValue = veriTabani.getOrDefault(parcalar[1], "0");
+                                Integer fetched_value = Integer.parseInt(rawValue);
+                                fetched_value++;
+                                String str_value = String.valueOf(fetched_value);
+                                veriTabani.put(parcalar[1], str_value);
+
+                                out.print(":" + str_value + "\r\n");
+                            }
+
+                        }
+                        else {
                             throw new InvalidCommandException("Bilinmeyen komut" + parcalar[0]);
                         }
                         out.flush();
                     } catch (InvalidCommandException e) {
                         out.print("-ERR " + e.getMessage() + "\r\n");
+                        out.flush();
+                    }
+                    catch (NumberFormatException e){
+                        out.print("-ERR deger integer degil veya out of range\r\n");
                         out.flush();
                     }
 
