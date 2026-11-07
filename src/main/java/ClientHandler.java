@@ -1,13 +1,14 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientHandler implements Runnable {
 
     private final Socket clientSocket;
-    private final HashMap<String, String> veriTabani;
+    private final ConcurrentHashMap<String, String> veriTabani;
 
-    public ClientHandler(Socket clientSocket, HashMap<String, String> veriTabani) {
+    public ClientHandler(Socket clientSocket, ConcurrentHashMap<String, String> veriTabani) {
         this.clientSocket = clientSocket;
         this.veriTabani = veriTabani;
     }
@@ -32,14 +33,14 @@ public class ClientHandler implements Runnable {
                     try {
                         if (parcalar[0].equalsIgnoreCase("COMMAND")) {
                             out.print("+OK\r\n");
-                            
+
                         } else if (parcalar[0].equalsIgnoreCase("Set")) {
                             if (parcalar.length < 3) {
                                 throw new InvalidCommandException("Set komutu icin eksik arguman!");
                             } else {
                                 veriTabani.put(parcalar[1], parcalar[2]);
                                 out.print("+Kaydedildi.\r\n");
-                                
+
                             }
 
                         } else if (parcalar[0].equalsIgnoreCase("Get")) {
@@ -49,14 +50,14 @@ public class ClientHandler implements Runnable {
                             else {
                                 String sonuc = veriTabani.get(parcalar[1]);
                                 if (sonuc == null) {
-                                  out.print("$-1\r\n");
+                                    out.print("$-1\r\n");
                                 } else {
                                     out.print("$" + sonuc.length() + "\r\n" + sonuc + "\r\n");
-                                    }
+                                }
                             }
                         } else if (parcalar[0].equalsIgnoreCase("PING")) {
                             out.print("+PONG\r\n");
-                            
+
                         } else if (parcalar[0].equalsIgnoreCase("DEL")) {
                             if (parcalar.length < 2) {
                                 throw new InvalidCommandException("Del komutu icin eksik arguman!");
@@ -67,24 +68,26 @@ public class ClientHandler implements Runnable {
                                 } else {
                                     out.print(":0\r\n");
                                 }
-                                
+
                             }
                         }
                         else if (parcalar[0].equalsIgnoreCase("INCR")){
-                            if(parcalar.length < 2){
+                            if(parcalar.length<2){
                                 throw new InvalidCommandException("INCR komutu icin eksik arguman");
                             }
-                            else {
-                                // DİKKAT: Race Condition'a açık olan o meşhur hatalı blok
-                                String rawValue = veriTabani.getOrDefault(parcalar[1], "0");
-                                Integer fetched_value = Integer.parseInt(rawValue);
-                                fetched_value++;
-                                String str_value = String.valueOf(fetched_value);
-                                veriTabani.put(parcalar[1], str_value);
-
-                                out.print(":" + str_value + "\r\n");
+                            else{
+                                String new_value = veriTabani.compute(parcalar[1],(anahtar,eskiDeger)->{
+                                    if (eskiDeger == null){
+                                        return "1";
+                                    }
+                                    else {
+                                        Integer int_eski_deger = Integer.parseInt(eskiDeger);
+                                        int_eski_deger++;
+                                        return String.valueOf(int_eski_deger);
+                                    }
+                                } );
+                                out.print(":" + new_value + "\r\n");
                             }
-
                         }
                         else {
                             throw new InvalidCommandException("Bilinmeyen komut" + parcalar[0]);
