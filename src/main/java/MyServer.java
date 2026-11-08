@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MyServer {
     public static void main(String[] args) {
 
-        ConcurrentHashMap<String,String> veriTabani = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String,CacheEntry> veriTabani = new ConcurrentHashMap<>();
         // 6666: Port numarası
         // 500: İşletim sistemindeki bekleme odası (Backlog) kapasitesi!
         try (ServerSocket serverSocket = new ServerSocket(6666,500)
