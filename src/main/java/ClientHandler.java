@@ -103,16 +103,23 @@ public class ClientHandler implements Runnable {
                                 throw new InvalidCommandException("EXPIRE komutu icin eksik arguman");
                             }
                             else{
-                                CacheEntry value = veriTabani.get(parcalar[1]);
-                                if (value == null || value.isExpired()){
+                                String key = parcalar[1];
+                                Integer time_to_add = Integer.parseInt(parcalar[2]);
+                                Long new_time = System.currentTimeMillis() + (time_to_add * 1000L);
+
+                                CacheEntry result = veriTabani.computeIfPresent(key, (k,current_box) -> {
+                                    if (current_box.isExpired()){
+                                        return null;
+                                    }
+                                    else{
+                                        return new CacheEntry(current_box.getValue(),new_time);
+                                    }
+                                }
+                                );
+                                if(result == null){
                                     out.print(":0\r\n");
-                                    veriTabani.remove(parcalar[1]);
                                 }
                                 else {
-                                    Integer time_to_add = Integer.parseInt(parcalar[2]);
-                                    Long new_time = System.currentTimeMillis() + (time_to_add * 1000L);
-                                    CacheEntry new_cache_entry = new CacheEntry(value.getValue(), new_time);
-                                    veriTabani.put(parcalar[1],new_cache_entry);
                                     out.print(":1\r\n");
                                 }
                             }
