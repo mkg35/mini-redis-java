@@ -11,6 +11,7 @@ public class StressTest {
         //100 kişilik bir saldırı timi
         ExecutorService saldiriTimi = Executors.newFixedThreadPool(100);
         int toplamIstek = 100;
+        long startTime = System.currentTimeMillis();
 
         System.out.println("Saldiri basliyor"+ toplamIstek+"adet INCR komutu atilacak.");
 
@@ -35,6 +36,8 @@ public class StressTest {
         }
         saldiriTimi.shutdown();
         saldiriTimi.awaitTermination(1,TimeUnit.MINUTES);
-        System.out.println("Saldiri bitti! Simdi redis-cli ile 'GET bilet' yazip sonuca bak!");
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Toplam sure:" + (endTime-startTime) + "ms");
     }
 }

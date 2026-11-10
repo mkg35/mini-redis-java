@@ -85,17 +85,28 @@ public class ClientHandler implements Runnable {
                                 throw new InvalidCommandException("INCR komutu icin eksik arguman");
                             }
                             else{
-                                CacheEntry new_value = veriTabani.compute(parcalar[1],(anahtar,eskiDeger)->{
-                                    if (eskiDeger == null || eskiDeger.isExpired()){
-                                        return new CacheEntry("1",null);
+                                String key = parcalar[1];
+
+                                synchronized (veriTabani){
+                                    CacheEntry oldValue = veriTabani.get(key);
+
+                                    int newNumber;
+                                    Long oldExpire = null;
+
+                                    if(oldValue == null || oldValue.isExpired()){
+                                        newNumber = 1;
                                     }
                                     else {
-                                        Integer int_eski_deger = Integer.parseInt(eskiDeger.getValue());
-                                        int_eski_deger++;
-                                        return new CacheEntry(String.valueOf(int_eski_deger), eskiDeger.getExpireAt());
+                                        newNumber = Integer.parseInt(oldValue.getValue());
+                                        newNumber++;
+                                        oldExpire = oldValue.getExpireAt();
                                     }
-                                } );
-                                out.print(":" + new_value.getValue() + "\r\n");
+
+                                    CacheEntry newRegister = new CacheEntry(String.valueOf(newNumber),oldExpire);
+                                    veriTabani.put(key,newRegister);
+
+                                    out.print(":"+newNumber+"\r\n");
+                                }
                             }
                         }
                         else if (parcalar[0].equalsIgnoreCase("EXPIRE")){
